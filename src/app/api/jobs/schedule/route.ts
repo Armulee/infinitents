@@ -4,12 +4,11 @@ import { runDailySchedule } from "@/server/pipeline/scheduler";
 export const runtime = "nodejs";
 export const maxDuration = 300;
 
-/** Daily autopilot scheduler — cron only. */
+/** Daily autopilot scheduler — Cloudflare cron worker only (CRON_SECRET bearer). */
 export async function POST(req: NextRequest) {
   const secret = process.env.CRON_SECRET;
   const header = req.headers.get("authorization");
-  const isVercelCron = req.headers.get("x-vercel-cron") && process.env.VERCEL;
-  if (!(secret && header === `Bearer ${secret}`) && !isVercelCron) {
+  if (!(secret && header === `Bearer ${secret}`)) {
     return NextResponse.json({ error: "unauthorized" }, { status: 401 });
   }
 

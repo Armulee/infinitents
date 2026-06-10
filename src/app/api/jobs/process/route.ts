@@ -7,14 +7,14 @@ export const maxDuration = 300;
 
 /**
  * Worker tick — claims and executes queued ai_jobs.
- * Drivers: Vercel cron / Supabase Edge Function (CRON_SECRET), the standalone
- * `npm run worker`, or the in-app pulse (any authenticated member).
+ * Drivers: the Cloudflare cron worker (workers/cron, CRON_SECRET bearer),
+ * the standalone `npm run worker`, or the in-app pulse (any authenticated
+ * member).
  */
 async function authorized(req: NextRequest): Promise<"cron" | "user" | null> {
   const secret = process.env.CRON_SECRET;
   const header = req.headers.get("authorization");
   if (secret && header === `Bearer ${secret}`) return "cron";
-  if (req.headers.get("x-vercel-cron") && process.env.VERCEL) return "cron";
 
   const supabase = await supabaseServer();
   const {

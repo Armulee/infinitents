@@ -62,7 +62,7 @@ The job queue drains three ways (all safe concurrently — claiming is `SKIP LOC
 
 - **In-app pulse** — while the app is open, pending jobs are processed automatically (zero setup; this is all you need in dev).
 - **Standalone worker** — `npm run worker` for a dedicated loop.
-- **Cron** — `vercel.json` ships crons (`/api/jobs/process` every minute, `/api/jobs/schedule` daily). Off Vercel, schedule the Supabase Edge Function `pipeline-tick` (see `supabase/functions/pipeline-tick`).
+- **Cron** — the Cloudflare Worker in `workers/cron` fires on Cron Triggers (`/api/jobs/process` every minute, `/api/jobs/schedule` daily at 06:00 UTC) and works on the Workers **Free plan**. See [Production cron](#production-cron-cloudflare-workers). Alternatively, schedule the Supabase Edge Function `pipeline-tick` (see `supabase/functions/pipeline-tick`).
 
 ### 4. Demo data (optional, recommended)
 
@@ -112,6 +112,8 @@ src/
   server/
     providers/                   # AI provider abstraction (text/image/video + mock)
     pipeline/                    # prompts, stages, runner, scheduler, AI editor
+workers/
+  cron/                          # Cloudflare Worker — production cron (free plan)
 scripts/
   seed.ts                        # demo workspace
   worker.ts                      # standalone queue worker
@@ -119,9 +121,53 @@ scripts/
 
 ## Deployment
 
-1. Push the repo to GitHub and import into Vercel (crons are picked up from `vercel.json`).
-2. Set the env vars from `.env.example` in Vercel.
+### 1. App (Vercel or any Node host)
+
+1. Push the repo to GitHub and import into Vercel (the Hobby plan is fine — cron runs on Cloudflare, not Vercel).
+2. Set the env vars from `.env.example` in the hosting dashboard. Note the `CRON_SECRET` value — the cron worker needs the same one.
 3. Apply the migration to your production Supabase project.
-4. (Optional) `supabase functions deploy pipeline-tick` + schedule it if you're not on Vercel cron.
+
+### 2. Production cron (Cloudflare Workers)
+
+Scheduling runs on **Cloudflare Workers Cron Triggers** — available on the Workers **Free plan** (the every-minute schedule is ~1,441 invocations/day against a 100,000/day limit). The worker is a thin trigger that calls the Next.js API endpoints, so all business logic stays in the app:
+
+| Cron Trigger (UTC) | Calls | Purpose |
+| --- | --- | --- |
+| `* * * * *` | `POST {APP_URL}/api/jobs/process` | Drain the `ai_jobs` queue |
+| `0 6 * * *` | `POST {APP_URL}/api/jobs/schedule` | Daily autopilot (ideas → production → publishes → analytics) |
+
+Deploy it:
+
+```bash
+cd workers/cron
+npm install
+npx wrangler login                      # one-time Cloudflare auth
+npx wrangler secret put CRON_SECRET     # paste the SAME value as the app's CRON_SECRET
+npm run deploy -- --var APP_URL:https://your-app.vercel.app
+```
+
+(Or edit `APP_URL` in `workers/cron/wrangler.toml` and just `npm run deploy`.)
+
+Verify:
+
+```bash
+npm run tail                            # live logs; expect "[cron:process] ok …" each minute
+curl https://infinitents-cron.<your-subdomain>.workers.dev/health
+# manual fire of either job:
+curl -X POST -H "Authorization: Bearer $CRON_SECRET" \
+  "https://infinitents-cron.<your-subdomain>.workers.dev/trigger?task=schedule"
+```
+
+Local development of the worker (`wrangler dev --test-scheduled` via `npm run dev`, with `.dev.vars` copied from `.dev.vars.example`):
+
+```bash
+curl "http://localhost:8787/__scheduled?cron=*+*+*+*+*"   # simulates the every-minute trigger
+```
+
+Failed runs throw, so they show up as errors in the Cloudflare dashboard (Workers → infinitents-cron → Metrics) — point alerts there.
+
+### 3. Optional
+
+`supabase functions deploy pipeline-tick` + a Supabase schedule can substitute for the Cloudflare worker if you'd rather keep everything in Supabase.
 
 The primary success metric is built into the product: **videos approved and published.** Everything else is supporting cast.

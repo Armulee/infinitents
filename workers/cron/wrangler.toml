@@ -1,0 +1,31 @@
+# Infinitents cron worker — Cloudflare Workers Cron Triggers.
+# Replaces Vercel Cron Jobs; works on the Workers Free plan.
+#
+# Deploy:
+#   cd workers/cron
+#   npm install
+#   npx wrangler login
+#   npx wrangler secret put CRON_SECRET     # same value as the Next.js app
+#   npm run deploy
+
+name = "infinitents-cron"
+main = "src/index.ts"
+compatibility_date = "2025-01-15"
+
+# Mirrors the schedules previously in vercel.json (all times UTC).
+[triggers]
+crons = [
+  "* * * * *",  # queue tick   → POST {APP_URL}/api/jobs/process
+  "0 6 * * *",  # daily autopilot → POST {APP_URL}/api/jobs/schedule
+]
+
+[vars]
+# Base URL of the deployed Next.js app (no trailing slash).
+# Override per-deploy with: wrangler deploy --var APP_URL:https://your-app.example.com
+APP_URL = "https://your-app.vercel.app"
+
+# Secrets (never in this file):
+#   CRON_SECRET — set with `wrangler secret put CRON_SECRET`
+
+[observability]
+enabled = true

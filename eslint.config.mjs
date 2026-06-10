@@ -10,7 +10,8 @@ const compat = new FlatCompat({ baseDirectory: __dirname });
 const eslintConfig = [
   ...compat.extends("next/core-web-vitals", "next/typescript"),
   {
-    ignores: ["node_modules/**", ".next/**", "out/**", "supabase/functions/**"],
+    // workers/** has its own toolchain (Cloudflare types + tsconfig)
+    ignores: ["node_modules/**", ".next/**", "out/**", "supabase/functions/**", "workers/**"],
   },
   {
     rules: {
