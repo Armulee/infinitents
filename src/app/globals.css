@@ -1,0 +1,234 @@
+@import "tailwindcss";
+@import "tw-animate-css";
+
+@custom-variant dark (&:is(.dark *));
+
+/* ── Theme tokens ─────────────────────────────────────────────────────────────
+   Premium, restrained, fast. Linear × Stripe × Apple — never gimmicky. */
+
+:root {
+  --background: oklch(0.985 0.001 286);
+  --foreground: oklch(0.21 0.006 286);
+  --card: oklch(1 0 0);
+  --card-foreground: oklch(0.21 0.006 286);
+  --popover: oklch(1 0 0);
+  --popover-foreground: oklch(0.21 0.006 286);
+  --primary: oklch(0.51 0.177 277.5);
+  --primary-foreground: oklch(0.985 0.005 277);
+  --secondary: oklch(0.957 0.003 286);
+  --secondary-foreground: oklch(0.3 0.01 286);
+  --muted: oklch(0.962 0.002 286);
+  --muted-foreground: oklch(0.54 0.012 286);
+  --accent: oklch(0.948 0.008 277);
+  --accent-foreground: oklch(0.32 0.06 277);
+  --destructive: oklch(0.577 0.215 27.3);
+  --destructive-foreground: oklch(0.985 0 0);
+  --success: oklch(0.627 0.155 155);
+  --warning: oklch(0.74 0.15 75);
+  --border: oklch(0.915 0.004 286);
+  --input: oklch(0.895 0.005 286);
+  --ring: oklch(0.51 0.177 277.5);
+  --chart-1: oklch(0.585 0.17 277);
+  --chart-2: oklch(0.64 0.13 200);
+  --chart-3: oklch(0.69 0.14 155);
+  --chart-4: oklch(0.74 0.15 75);
+  --chart-5: oklch(0.62 0.19 330);
+  --sidebar: oklch(0.975 0.002 286);
+  --radius: 0.625rem;
+}
+
+.dark {
+  --background: oklch(0.156 0.005 285);
+  --foreground: oklch(0.93 0.004 286);
+  --card: oklch(0.193 0.006 285);
+  --card-foreground: oklch(0.93 0.004 286);
+  --popover: oklch(0.21 0.006 285);
+  --popover-foreground: oklch(0.93 0.004 286);
+  --primary: oklch(0.672 0.155 277);
+  --primary-foreground: oklch(0.145 0.02 277);
+  --secondary: oklch(0.235 0.006 285);
+  --secondary-foreground: oklch(0.86 0.005 286);
+  --muted: oklch(0.225 0.006 285);
+  --muted-foreground: oklch(0.62 0.01 286);
+  --accent: oklch(0.26 0.02 277);
+  --accent-foreground: oklch(0.85 0.06 277);
+  --destructive: oklch(0.65 0.19 25);
+  --destructive-foreground: oklch(0.985 0 0);
+  --success: oklch(0.7 0.145 155);
+  --warning: oklch(0.78 0.14 75);
+  --border: oklch(0.27 0.006 285);
+  --input: oklch(0.29 0.007 285);
+  --ring: oklch(0.672 0.155 277);
+  --chart-1: oklch(0.672 0.155 277);
+  --chart-2: oklch(0.7 0.12 200);
+  --chart-3: oklch(0.73 0.13 155);
+  --chart-4: oklch(0.78 0.14 75);
+  --chart-5: oklch(0.68 0.17 330);
+  --sidebar: oklch(0.172 0.005 285);
+}
+
+@theme inline {
+  --color-background: var(--background);
+  --color-foreground: var(--foreground);
+  --color-card: var(--card);
+  --color-card-foreground: var(--card-foreground);
+  --color-popover: var(--popover);
+  --color-popover-foreground: var(--popover-foreground);
+  --color-primary: var(--primary);
+  --color-primary-foreground: var(--primary-foreground);
+  --color-secondary: var(--secondary);
+  --color-secondary-foreground: var(--secondary-foreground);
+  --color-muted: var(--muted);
+  --color-muted-foreground: var(--muted-foreground);
+  --color-accent: var(--accent);
+  --color-accent-foreground: var(--accent-foreground);
+  --color-destructive: var(--destructive);
+  --color-destructive-foreground: var(--destructive-foreground);
+  --color-success: var(--success);
+  --color-warning: var(--warning);
+  --color-border: var(--border);
+  --color-input: var(--input);
+  --color-ring: var(--ring);
+  --color-chart-1: var(--chart-1);
+  --color-chart-2: var(--chart-2);
+  --color-chart-3: var(--chart-3);
+  --color-chart-4: var(--chart-4);
+  --color-chart-5: var(--chart-5);
+  --color-sidebar: var(--sidebar);
+
+  --font-sans: var(--font-inter), ui-sans-serif, system-ui, -apple-system, sans-serif;
+  --font-mono: var(--font-mono), ui-monospace, "SF Mono", monospace;
+
+  --radius-sm: calc(var(--radius) - 4px);
+  --radius-md: calc(var(--radius) - 2px);
+  --radius-lg: var(--radius);
+  --radius-xl: calc(var(--radius) + 4px);
+  --radius-2xl: calc(var(--radius) + 10px);
+
+  --breakpoint-xs: 23.4375rem; /* 375 — per design.md breakpoints */
+
+  --animate-shimmer: shimmer 2s linear infinite;
+  --animate-pulse-soft: pulse-soft 2.4s ease-in-out infinite;
+
+  @keyframes shimmer {
+    from {
+      background-position: 200% 0;
+    }
+    to {
+      background-position: -200% 0;
+    }
+  }
+  @keyframes pulse-soft {
+    0%,
+    100% {
+      opacity: 1;
+    }
+    50% {
+      opacity: 0.55;
+    }
+  }
+}
+
+/* ── Base ──────────────────────────────────────────────────────────────────── */
+
+* {
+  border-color: var(--color-border);
+}
+
+html {
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+  text-rendering: optimizeLegibility;
+  scroll-behavior: smooth;
+}
+
+body {
+  background: var(--color-background);
+  color: var(--color-foreground);
+  font-feature-settings: "cv11", "ss01", "ss03";
+  letter-spacing: -0.011em;
+  overscroll-behavior-y: none;
+}
+
+::selection {
+  background: color-mix(in oklch, var(--color-primary) 28%, transparent);
+}
+
+/* Refined scrollbars */
+* {
+  scrollbar-width: thin;
+  scrollbar-color: color-mix(in oklch, var(--color-foreground) 16%, transparent) transparent;
+}
+*::-webkit-scrollbar {
+  width: 8px;
+  height: 8px;
+}
+*::-webkit-scrollbar-thumb {
+  background: color-mix(in oklch, var(--color-foreground) 16%, transparent);
+  border-radius: 8px;
+}
+*::-webkit-scrollbar-track {
+  background: transparent;
+}
+
+@utility no-scrollbar {
+  scrollbar-width: none;
+  &::-webkit-scrollbar {
+    display: none;
+  }
+}
+
+/* Hairline borders on retina */
+@utility hairline {
+  box-shadow: inset 0 0 0 1px var(--color-border);
+}
+
+/* Premium surface treatments */
+@utility glass {
+  background: color-mix(in oklch, var(--color-background) 78%, transparent);
+  backdrop-filter: blur(14px) saturate(1.4);
+  -webkit-backdrop-filter: blur(14px) saturate(1.4);
+}
+
+@utility card-hover {
+  transition:
+    border-color 150ms ease,
+    background-color 150ms ease,
+    transform 150ms ease,
+    box-shadow 150ms ease;
+  &:hover {
+    border-color: color-mix(in oklch, var(--color-foreground) 14%, transparent);
+  }
+}
+
+@utility text-gradient {
+  background: linear-gradient(
+    135deg,
+    var(--color-foreground) 30%,
+    color-mix(in oklch, var(--color-foreground) 55%, var(--color-primary))
+  );
+  -webkit-background-clip: text;
+  background-clip: text;
+  color: transparent;
+}
+
+@utility shimmer-bg {
+  background: linear-gradient(
+    100deg,
+    transparent 30%,
+    color-mix(in oklch, var(--color-foreground) 7%, transparent) 50%,
+    transparent 70%
+  );
+  background-size: 200% 100%;
+  animation: var(--animate-shimmer);
+}
+
+/* Tabular numbers for metrics */
+@utility tnum {
+  font-variant-numeric: tabular-nums;
+}
+
+/* Hide native video controls fullscreen chrome on iOS in the queue player */
+video::-webkit-media-controls {
+  display: none !important;
+}
