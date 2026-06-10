@@ -85,6 +85,30 @@ Creates **demo@infinitents.app / infinitents-demo** with the *Lumen* workspace: 
 | **Analytics** | Views, engagement, platform breakdown, top videos — feeds the learning loop |
 | **Studio** (`/studio/[id]`) | CapCut-simple editor: scene timeline (drag to reorder), subtitle editor, audio controls, transitions, asset library and an **AI chat panel** that edits the project from natural language ("Make the intro stronger", "Shorten to 20 seconds") |
 
+## Authentication
+
+Supabase Auth is the single source of truth. Email + password and **Google OAuth** both resolve to the same `auth.users` row; sessions are cookie-based (`@supabase/ssr`, PKCE) and refreshed by the middleware on every request. Profiles are created by a database trigger and kept in sync when identities link.
+
+**Enable "Continue with Google":**
+
+1. **Google Cloud Console** → APIs & Services → Credentials → *Create OAuth client ID* (type: Web application).
+   - Authorized JavaScript origins: `http://localhost:3000` and your production URL.
+   - Authorized redirect URI: `https://<project-ref>.supabase.co/auth/v1/callback`.
+2. **Supabase Dashboard** → Authentication → Sign In / Providers → **Google**: enable it and paste the Client ID + Client Secret. (No app env vars needed.)
+3. **Supabase Dashboard** → Authentication → URL Configuration:
+   - *Site URL*: your production app URL.
+   - *Redirect URLs*: add `http://localhost:3000/auth/callback` and `https://<your-app>/auth/callback`.
+4. Apply `supabase/migrations/00002_oauth_profile_sync.sql` (`supabase db push`) so Google's `name`/`picture` metadata maps into profiles and identity-linking backfills them.
+
+**Account linking — no duplicate accounts:** Supabase automatically links a Google sign-in to an existing user when the email matches and both are verified, so an email/password user who later clicks "Continue with Google" lands in the same account, workspaces intact. Keep **Confirm email** enabled (Authentication → Sign In / Providers → Email) so password accounts are always verified and linking can occur. The reverse direction is safe too: signing *up* with a password on an email that already has a Google identity is rejected by Supabase rather than duplicated.
+
+**Email links (recommended):** point the email templates (Authentication → Emails) at the token-hash route so confirmation and reset links work even when opened in a different browser than the one that started the flow:
+
+- *Confirm signup*: `{{ .SiteURL }}/auth/confirm?token_hash={{ .TokenHash }}&type=signup`
+- *Reset password*: `{{ .SiteURL }}/auth/confirm?token_hash={{ .TokenHash }}&type=recovery`
+
+Flow map: `/auth/callback` exchanges PKCE codes (Google OAuth + same-browser email links) · `/auth/confirm` verifies token-hash email links · `/reset-password` sets a new password from a recovery session · "Forgot password?" lives on `/login`.
+
 ## Architecture notes
 
 - **Multi-tenancy + RLS** — every row carries `workspace_id`; policies enforce member read / editor write / admin delete via `is_workspace_member()` and `workspace_role()` (SECURITY DEFINER to avoid recursive RLS).
