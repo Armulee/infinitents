@@ -357,9 +357,30 @@ async function main() {
   console.log("  · analytics history");
 
   // 7. A couple of live-looking jobs for the Factory
+  // (batch rows must share identical keys — PostgREST nullifies gaps)
   await db.from("ai_jobs").insert([
-    { workspace_id: wsId, stage: "idea_generation", status: "succeeded", progress: 100, payload: { brand_id: brandId, count: 6 }, brand_id: brandId, finished_at: new Date().toISOString(), result: { generated: 6 } },
-    { workspace_id: wsId, stage: "analytics_sync", status: "queued", payload: {}, scheduled_at: new Date(Date.now() + 3_600_000).toISOString() },
+    {
+      workspace_id: wsId,
+      stage: "idea_generation",
+      status: "succeeded",
+      progress: 100,
+      payload: { brand_id: brandId, count: 6 },
+      brand_id: brandId,
+      scheduled_at: new Date(Date.now() - 3_600_000).toISOString(),
+      finished_at: new Date().toISOString(),
+      result: { generated: 6 },
+    },
+    {
+      workspace_id: wsId,
+      stage: "analytics_sync",
+      status: "queued",
+      progress: 0,
+      payload: {},
+      brand_id: null,
+      scheduled_at: new Date(Date.now() + 3_600_000).toISOString(),
+      finished_at: null,
+      result: null,
+    },
   ]);
 
   console.log("\n✓ Seed complete.\n");

@@ -75,6 +75,9 @@ export default function OnboardingPage() {
       const brandId = (brand as { id: string }).id;
 
       // 4. Kick the pipeline: Brand Brain extraction + first idea batch.
+      // NB: batch-insert rows must share an identical key set — PostgREST
+      // sends the union of columns and fills gaps with explicit NULLs,
+      // bypassing database defaults.
       const { error: jobErr } = await supabase.from("ai_jobs").insert([
         {
           workspace_id: workspaceId,
@@ -82,6 +85,7 @@ export default function OnboardingPage() {
           payload: { brand_id: brandId },
           brand_id: brandId,
           priority: 9,
+          scheduled_at: new Date().toISOString(),
         },
         {
           workspace_id: workspaceId,
@@ -92,12 +96,22 @@ export default function OnboardingPage() {
           scheduled_at: new Date(Date.now() + 5_000).toISOString(),
         },
       ]);
-      if (jobErr) throw jobErr;
 
       localStorage.setItem("infinitents-active-workspace", workspaceId);
-      toast.success("Your content department is live", {
-        description: "Brand Brain extraction and your first idea batch are running.",
-      });
+
+      // The workspace is fully created at this point — a kickoff hiccup must
+      // not fail the launch (re-running onboarding would duplicate it).
+      if (jobErr) {
+        console.error("pipeline kickoff failed:", jobErr);
+        toast.warning("Workspace created — pipeline kickoff needs a nudge", {
+          description:
+            "Run “Extract brand knowledge” in Brand Brain and “Generate ideas” on the Dashboard.",
+        });
+      } else {
+        toast.success("Your content department is live", {
+          description: "Brand Brain extraction and your first idea batch are running.",
+        });
+      }
       router.push("/dashboard");
       router.refresh();
     } catch (err) {
