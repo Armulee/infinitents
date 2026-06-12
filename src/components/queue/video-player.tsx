@@ -35,10 +35,13 @@ export function VideoPlayer({
   const [playing, setPlaying] = useState(autoPlay);
   const [elapsedBefore, setElapsedBefore] = useState(0); // seconds in completed scenes
   const [sceneTime, setSceneTime] = useState(0);
+  // Clips whose media failed to load (404/403/codec) — those scenes fall back
+  // to the visual-direction card with timer advancement instead of freezing.
+  const [failedMedia, setFailedMedia] = useState<Record<string, boolean>>({});
   const lastTap = useRef(0);
 
   const scenes = useMemo(() => doc?.scenes ?? [], [doc]);
-  const isFinalRender = Boolean(project.final_video_url);
+  const isFinalRender = Boolean(project.final_video_url) && !failedMedia.final;
   const totalDuration = useMemo(
     () =>
       isFinalRender
@@ -65,8 +68,16 @@ export function VideoPlayer({
     setSceneIndex(0);
     setElapsedBefore(0);
     setSceneTime(0);
+    setFailedMedia({});
     setPlaying(autoPlay);
   }, [project.id, autoPlay]);
+
+  const sceneClipFailed = scene ? Boolean(failedMedia[String(scene.index)]) : false;
+  const src = isFinalRender
+    ? project.final_video_url!
+    : sceneClipFailed
+      ? null
+      : (scene?.clip_url ?? null);
 
   // Drive playback + scene advancement.
   useEffect(() => {
@@ -76,7 +87,7 @@ export function VideoPlayer({
       else video.pause();
     }
     if (!playing || video) return;
-    // No clip for this scene — simulate time so captions/progress still run.
+    // No playable clip for this scene — simulate time so captions/progress still run.
     const id = setInterval(() => {
       setSceneTime((t) => {
         const limit = scene?.duration ?? 5;
@@ -88,7 +99,7 @@ export function VideoPlayer({
       });
     }, 100);
     return () => clearInterval(id);
-  }, [playing, scene, sceneIndex, advance]);
+  }, [playing, scene, sceneIndex, advance, src]);
 
   const onTimeUpdate = () => {
     const video = videoRef.current;
@@ -116,8 +127,6 @@ export function VideoPlayer({
     }, 285);
   };
 
-  const src = isFinalRender ? project.final_video_url! : (scene?.clip_url ?? null);
-
   return (
     <div
       className={cn(
@@ -138,6 +147,12 @@ export function VideoPlayer({
           loop={isFinalRender}
           onTimeUpdate={onTimeUpdate}
           onEnded={advance}
+          onError={() =>
+            setFailedMedia((f) => ({
+              ...f,
+              [isFinalRender ? "final" : String(scene?.index ?? sceneIndex)]: true,
+            }))
+          }
           className="absolute inset-0 size-full object-cover"
         />
       ) : (
