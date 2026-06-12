@@ -20,12 +20,12 @@ const db = createClient(URL, KEY, { auth: { persistSession: false } });
 const DEMO_EMAIL = "demo@infinitents.app";
 const DEMO_PASSWORD = "infinitents-demo";
 
+// Verified public sample clips, served as video/mp4
+// (Google's legacy gtv-videos-bucket went private).
 const CLIPS = [
-  "https://commondatastorage.googleapis.com/gtv-videos-bucket/sample/ForBiggerBlazes.mp4",
-  "https://commondatastorage.googleapis.com/gtv-videos-bucket/sample/ForBiggerEscapes.mp4",
-  "https://commondatastorage.googleapis.com/gtv-videos-bucket/sample/ForBiggerFun.mp4",
-  "https://commondatastorage.googleapis.com/gtv-videos-bucket/sample/ForBiggerJoyrides.mp4",
-  "https://commondatastorage.googleapis.com/gtv-videos-bucket/sample/ForBiggerMeltdowns.mp4",
+  "https://storage.googleapis.com/exoplayer-test-media-1/mp4/android-screens-10s.mp4",
+  "https://storage.googleapis.com/exoplayer-test-media-1/mp4/android-screens-25s.mp4",
+  "https://storage.googleapis.com/exoplayer-test-media-1/mp4/dizzy-with-tx3g.mp4",
 ];
 const thumb = (seed: number) => `https://picsum.photos/seed/${seed}/720/1280`;
 

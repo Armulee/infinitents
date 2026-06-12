@@ -59,13 +59,13 @@ export const mockImageProvider: ImageProvider = {
   },
 };
 
-/** Public-domain sample clips (Google sample bucket) so the queue/editor are playable. */
+/** Public sample clips so the queue/editor are playable.
+ * Verified live + served as video/mp4 (Google's legacy gtv-videos-bucket went
+ * private, and GitHub-raw media is blocked by nosniff in browsers). */
 const SAMPLE_CLIPS = [
-  "https://commondatastorage.googleapis.com/gtv-videos-bucket/sample/ForBiggerBlazes.mp4",
-  "https://commondatastorage.googleapis.com/gtv-videos-bucket/sample/ForBiggerEscapes.mp4",
-  "https://commondatastorage.googleapis.com/gtv-videos-bucket/sample/ForBiggerFun.mp4",
-  "https://commondatastorage.googleapis.com/gtv-videos-bucket/sample/ForBiggerJoyrides.mp4",
-  "https://commondatastorage.googleapis.com/gtv-videos-bucket/sample/ForBiggerMeltdowns.mp4",
+  "https://storage.googleapis.com/exoplayer-test-media-1/mp4/android-screens-10s.mp4",
+  "https://storage.googleapis.com/exoplayer-test-media-1/mp4/android-screens-25s.mp4",
+  "https://storage.googleapis.com/exoplayer-test-media-1/mp4/dizzy-with-tx3g.mp4",
 ];
 
 const mockVideoJobs = new Map<string, { startedAt: number; prompt: string }>();
