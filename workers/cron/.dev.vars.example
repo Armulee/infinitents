@@ -1,0 +1,4 @@
+# Local development secrets for `wrangler dev` — copy to .dev.vars (gitignored).
+# APP_URL here overrides the wrangler.toml [vars] value during local dev.
+APP_URL=http://localhost:3000
+CRON_SECRET=generate-a-long-random-string
