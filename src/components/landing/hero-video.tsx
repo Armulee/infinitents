@@ -1,90 +1,134 @@
 "use client";
 
-import { useEffect, useRef, useState } from "react";
-import { useReducedMotion } from "framer-motion";
+import { useRef } from "react";
+import {
+  motion,
+  useReducedMotion,
+  useScroll,
+  useTransform,
+} from "framer-motion";
+import { cn } from "@/lib/utils";
+import { VideoTile } from "./video-tile";
+import { SHOWCASE, rotate, type ShowcaseVideo } from "./showcase-data";
 
 /**
- * Hero background video — mockup reel for now.
- * Swap HERO_VIDEO_SRC for the real brand reel (a ~10–20s loop of product
- * output: vertical videos being approved, published, charts climbing).
- * UX guardrails: muted/looped/inline, fades in only once it can play,
- * gradient poster while loading, and a static backdrop for users who
- * prefer reduced motion.
+ * Cinematic hero backdrop: a tilted wall of vertical clips drifting on
+ * opposing rails, washed with an aurora + conic glow and scrimmed so the
+ * headline stays crisp. The whole wall parallaxes as the page scrolls.
+ * Reduced-motion users get the static gradient posters (no drift, no playback).
  */
-// Mainstream browsers pick the H.264 MP4 (3.8 MB); the VP9 WebM is only
-// fetched by builds without H.264. Both verified live (Google's legacy
-// gtv-videos-bucket sample URLs now 403).
-const HERO_SOURCES = [
-  {
-    src: "https://storage.googleapis.com/exoplayer-test-media-1/mp4/android-screens-25s.mp4",
-    type: "video/mp4",
-  },
-  {
-    src: "https://storage.googleapis.com/exoplayer-test-media-1/gen-3/screens/dash-vod-single-segment/video-vp9-360.webm",
-    type: "video/webm",
-  },
-];
+
+function VerticalColumn({
+  videos,
+  direction,
+  duration,
+}: {
+  videos: ShowcaseVideo[];
+  direction: "up" | "down";
+  duration: number;
+}) {
+  return (
+    <div className="marquee-group h-full overflow-hidden">
+      <div
+        className={cn(
+          "marquee-track marquee-anim flex-col gap-3",
+          direction === "up" ? "animate-marquee-y" : "animate-marquee-y-rev",
+        )}
+        style={{ animationDuration: `${duration}s` }}
+      >
+        {[0, 1].map((copy) => (
+          <div key={copy} aria-hidden={copy === 1} className="flex flex-col gap-3 pb-3">
+            {videos.map((v) => (
+              <VideoTile
+                key={`${copy}-${v.id}`}
+                video={v}
+                showMeta={false}
+                rounded="rounded-xl"
+                className="w-full"
+              />
+            ))}
+          </div>
+        ))}
+      </div>
+    </div>
+  );
+}
 
 export function HeroVideo() {
   const prefersReducedMotion = useReducedMotion();
-  const videoRef = useRef<HTMLVideoElement>(null);
-  const [ready, setReady] = useState(false);
+  const ref = useRef<HTMLDivElement>(null);
+  const { scrollYProgress } = useScroll({
+    target: ref,
+    offset: ["start start", "end start"],
+  });
+  const y = useTransform(scrollYProgress, [0, 1], ["0%", "24%"]);
+  const scale = useTransform(scrollYProgress, [0, 1], [1, 1.08]);
+  const opacity = useTransform(scrollYProgress, [0, 0.8], [1, 0]);
 
-  useEffect(() => {
-    if (prefersReducedMotion) return;
-    const video = videoRef.current;
-    if (!video) return;
-    if (video.readyState >= 3) setReady(true);
-    // Some browsers (Low Power Mode, strict policies) ignore the autoplay
-    // attribute — nudge playback explicitly; the gradient poster stays up if
-    // it's refused.
-    video.play().catch(() => {});
-  }, [prefersReducedMotion]);
+  const columns = [
+    { videos: rotate(SHOWCASE, 0), direction: "up" as const, duration: 44 },
+    { videos: rotate(SHOWCASE, 2), direction: "down" as const, duration: 52 },
+    { videos: rotate(SHOWCASE, 4), direction: "up" as const, duration: 48 },
+    { videos: rotate(SHOWCASE, 6), direction: "down" as const, duration: 58 },
+    { videos: rotate(SHOWCASE, 1), direction: "up" as const, duration: 50 },
+    { videos: rotate(SHOWCASE, 3), direction: "down" as const, duration: 46 },
+  ];
 
   return (
-    <div aria-hidden className="absolute inset-0 overflow-hidden">
-      {/* static backdrop — also the loading poster and reduced-motion fallback */}
+    <div ref={ref} aria-hidden className="absolute inset-0 overflow-hidden">
+      {/* base gradient — also the reduced-motion still */}
       <div
         className="absolute inset-0"
         style={{
           background:
-            "radial-gradient(120% 90% at 50% 0%, oklch(0.32 0.09 282) 0%, oklch(0.21 0.04 285) 42%, oklch(0.156 0.005 285) 100%)",
+            "radial-gradient(120% 90% at 50% 0%, oklch(0.3 0.09 282) 0%, oklch(0.2 0.04 285) 44%, oklch(0.156 0.005 285) 100%)",
         }}
       />
 
+      {/* tilted video wall */}
       {!prefersReducedMotion && (
-        <video
-          ref={videoRef}
-          autoPlay
-          muted
-          loop
-          playsInline
-          preload="auto"
-          onCanPlay={(e) => {
-            setReady(true);
-            e.currentTarget.play().catch(() => {});
-          }}
-          className={`absolute inset-0 size-full object-cover transition-opacity duration-[1400ms] ease-out ${
-            ready ? "opacity-40" : "opacity-0"
-          }`}
+        <motion.div
+          style={{ y, scale, opacity }}
+          className="perspective-deep absolute inset-0"
         >
-          {HERO_SOURCES.map((s) => (
-            <source key={s.type} src={s.src} type={s.type} />
-          ))}
-        </video>
+          <div
+            className="absolute left-1/2 top-1/2 grid h-[150%] w-[135%] -translate-x-1/2 -translate-y-1/2 grid-cols-3 gap-3 sm:grid-cols-4 lg:grid-cols-6"
+            style={{
+              transform:
+                "translate(-50%, -50%) rotateX(14deg) rotateZ(-8deg) scale(1.05)",
+            }}
+          >
+            {columns.map((c, i) => (
+              <VerticalColumn key={i} {...c} />
+            ))}
+          </div>
+        </motion.div>
       )}
 
-      {/* scrims — keep the headline readable over any frame of the video */}
-      <div className="absolute inset-0 bg-gradient-to-b from-background/70 via-background/25 to-background" />
-      <div className="absolute inset-0 bg-[radial-gradient(85%_70%_at_50%_38%,transparent_0%,var(--color-background)_100%)]" />
-      {/* brand wash */}
+      {/* aurora blobs */}
       <div
-        className="absolute inset-0 opacity-25 mix-blend-soft-light"
+        aria-hidden
+        className="animate-aurora pointer-events-none absolute -left-1/4 top-0 h-[70%] w-[70%] rounded-full opacity-60 blur-3xl mix-blend-screen"
         style={{
           background:
-            "radial-gradient(60% 50% at 50% 30%, oklch(0.55 0.2 285), transparent 70%)",
+            "radial-gradient(closest-side, oklch(0.55 0.2 285), transparent)",
         }}
       />
+      <div
+        aria-hidden
+        className="animate-aurora pointer-events-none absolute -right-1/4 top-1/4 h-[60%] w-[60%] rounded-full opacity-50 blur-3xl mix-blend-screen"
+        style={{
+          background:
+            "radial-gradient(closest-side, oklch(0.6 0.16 320), transparent)",
+          animationDelay: "-8s",
+        }}
+      />
+
+      {/* scrims — keep the headline readable over any frame */}
+      <div className="absolute inset-0 bg-gradient-to-b from-background/55 via-background/72 to-background" />
+      <div className="absolute inset-0 bg-[radial-gradient(80%_65%_at_50%_42%,transparent_0%,color-mix(in_oklch,var(--color-background)_82%,transparent)_100%)]" />
+      <div className="grain-overlay pointer-events-none absolute inset-0 opacity-[0.15]" />
+
       {/* hairline that seats the hero onto the page */}
       <div className="absolute inset-x-0 bottom-0 h-px bg-gradient-to-r from-transparent via-border to-transparent" />
     </div>

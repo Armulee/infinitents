@@ -109,6 +109,13 @@
 
   --animate-shimmer: shimmer 2s linear infinite;
   --animate-pulse-soft: pulse-soft 2.4s ease-in-out infinite;
+  --animate-marquee-x: marquee-x 60s linear infinite;
+  --animate-marquee-x-rev: marquee-x-rev 60s linear infinite;
+  --animate-marquee-y: marquee-y 48s linear infinite;
+  --animate-marquee-y-rev: marquee-y-rev 48s linear infinite;
+  --animate-float: float 7s ease-in-out infinite;
+  --animate-aurora: aurora 22s ease-in-out infinite;
+  --animate-spin-slow: spin 24s linear infinite;
 
   @keyframes shimmer {
     from {
@@ -125,6 +132,56 @@
     }
     50% {
       opacity: 0.55;
+    }
+  }
+  @keyframes marquee-x {
+    to {
+      transform: translate3d(-50%, 0, 0);
+    }
+  }
+  @keyframes marquee-x-rev {
+    from {
+      transform: translate3d(-50%, 0, 0);
+    }
+    to {
+      transform: translate3d(0, 0, 0);
+    }
+  }
+  @keyframes marquee-y {
+    to {
+      transform: translate3d(0, -50%, 0);
+    }
+  }
+  @keyframes marquee-y-rev {
+    from {
+      transform: translate3d(0, -50%, 0);
+    }
+    to {
+      transform: translate3d(0, 0, 0);
+    }
+  }
+  @keyframes float {
+    0%,
+    100% {
+      transform: translateY(0);
+    }
+    50% {
+      transform: translateY(-14px);
+    }
+  }
+  @keyframes aurora {
+    0%,
+    100% {
+      transform: translate3d(0, 0, 0) scale(1);
+      opacity: 0.55;
+    }
+    33% {
+      transform: translate3d(6%, -4%, 0) scale(1.12);
+      opacity: 0.75;
+    }
+    66% {
+      transform: translate3d(-5%, 5%, 0) scale(1.05);
+      opacity: 0.6;
     }
   }
 }
@@ -231,4 +288,69 @@ body {
 /* Hide native video controls fullscreen chrome on iOS in the queue player */
 video::-webkit-media-controls {
   display: none !important;
+}
+
+/* ── Landing motion + surfaces ───────────────────────────────────────────── */
+
+/* Seamless infinite marquee rails. Track holds two identical halves; the
+   animation slides exactly one half so the loop is invisible. */
+@utility marquee-track {
+  display: flex;
+  width: max-content;
+  will-change: transform;
+}
+
+/* Pause any marquee inside on hover — child sets its own animation. */
+.marquee-group:hover .marquee-anim {
+  animation-play-state: paused;
+}
+
+/* Fine film grain to keep large gradients from banding — Linear/Arc trick. */
+@utility grain {
+  position: relative;
+}
+@utility grain-overlay {
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='140' height='140'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.85' numOctaves='2' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)' opacity='0.5'/%3E%3C/svg%3E");
+  background-size: 140px 140px;
+}
+
+/* Perspective wrapper for tilted video walls. */
+@utility perspective-deep {
+  perspective: 1400px;
+  perspective-origin: 50% 40%;
+}
+
+/* Soft edge fade for marquee rails (mask both ends). */
+@utility edge-fade-x {
+  -webkit-mask-image: linear-gradient(
+    to right,
+    transparent,
+    black 8%,
+    black 92%,
+    transparent
+  );
+  mask-image: linear-gradient(
+    to right,
+    transparent,
+    black 8%,
+    black 92%,
+    transparent
+  );
+}
+
+/* Conic spotlight used behind hero + CTA. */
+@utility conic-glow {
+  background: conic-gradient(
+    from 180deg at 50% 50%,
+    color-mix(in oklch, var(--color-primary) 55%, transparent) 0deg,
+    color-mix(in oklch, oklch(0.7 0.16 300) 45%, transparent) 120deg,
+    color-mix(in oklch, oklch(0.72 0.14 250) 45%, transparent) 240deg,
+    color-mix(in oklch, var(--color-primary) 55%, transparent) 360deg
+  );
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .marquee-anim {
+    animation: none !important;
+  }
 }
