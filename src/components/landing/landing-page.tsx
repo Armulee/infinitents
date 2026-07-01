@@ -2,12 +2,7 @@
 
 import { useEffect, useState } from "react";
 import Link from "next/link";
-import {
-  motion,
-  useScroll,
-  useSpring,
-  type Variants,
-} from "framer-motion";
+import { motion, useScroll, useSpring } from "framer-motion";
 import {
   ArrowRight,
   BarChart3,
@@ -32,7 +27,7 @@ import { ShowcaseReel } from "./video-wall";
 import { VideoTile } from "./video-tile";
 import { BatchScroll } from "./batch-scroll";
 import { Counter } from "./counter";
-import { Parallax } from "./parallax";
+import { Parallax, Reveal, ScrubX, ScrubLine } from "./parallax";
 import { SHOWCASE, rotate } from "./showcase-data";
 
 const PIPELINE = [
@@ -94,18 +89,6 @@ const STATS = [
   { to: 10, suffix: " min", label: "of your day", decimals: 0 },
   { to: 24, suffix: "/7", label: "always producing", decimals: 0 },
 ];
-
-const fadeUp: Variants = {
-  hidden: { opacity: 0, y: 22 },
-  show: { opacity: 1, y: 0 },
-};
-
-const reveal = {
-  initial: "hidden" as const,
-  whileInView: "show" as const,
-  viewport: { once: true, margin: "-80px" },
-  variants: fadeUp,
-};
 
 export function LandingPage({ configured }: { configured: boolean }) {
   const { scrollYProgress } = useScroll();
@@ -188,22 +171,20 @@ export function LandingPage({ configured }: { configured: boolean }) {
 
       {/* ── Living showcase rail ───────────────────────────────────────── */}
       <section className="relative overflow-hidden border-y border-border/60 bg-black py-14 sm:py-16">
-        <div className="mx-auto mb-9 max-w-6xl px-4 sm:px-6">
-          <motion.div {...reveal} className="flex flex-col items-start gap-3 sm:flex-row sm:items-end sm:justify-between">
-            <div>
-              <span className="inline-flex items-center gap-1.5 rounded-full border border-white/15 bg-white/5 px-3 py-1 text-[12px] font-medium text-white/70">
-                <Film className="size-3.5 text-primary" /> Straight from the pipeline
-              </span>
-              <h2 className="mt-4 text-balance text-2xl font-semibold tracking-tight text-white sm:text-3xl">
-                Every clip below was generated, not filmed.
-              </h2>
-            </div>
-            <p className="max-w-xs text-[13.5px] leading-relaxed text-white/55">
-              A live sample of the output — hooks, B-roll and full scenes,
-              rendered vertical and ready to post.
-            </p>
-          </motion.div>
-        </div>
+        <Reveal className="mx-auto mb-9 flex max-w-6xl flex-col items-start gap-3 px-4 sm:flex-row sm:items-end sm:justify-between sm:px-6">
+          <div>
+            <span className="inline-flex items-center gap-1.5 rounded-full border border-white/15 bg-white/5 px-3 py-1 text-[12px] font-medium text-white/70">
+              <Film className="size-3.5 text-primary" /> Straight from the pipeline
+            </span>
+            <h2 className="mt-4 text-balance text-2xl font-semibold tracking-tight text-white sm:text-3xl">
+              Every clip below was generated, not filmed.
+            </h2>
+          </div>
+          <p className="max-w-xs text-[13.5px] leading-relaxed text-white/55">
+            A live sample of the output — hooks, B-roll and full scenes,
+            rendered vertical and ready to post.
+          </p>
+        </Reveal>
 
         <ShowcaseReel />
       </section>
@@ -216,37 +197,27 @@ export function LandingPage({ configured }: { configured: boolean }) {
       {/* ── How it works ───────────────────────────────────────────────── */}
       <section id="how-it-works" className="relative mx-auto max-w-6xl scroll-mt-24 px-4 py-24 sm:px-6">
         <Parallax offset={36}>
-        <motion.div {...reveal} className="mx-auto max-w-xl text-center">
-          <span className="inline-flex items-center gap-1.5 rounded-full border border-border bg-secondary/60 px-3 py-1 text-[12px] font-medium text-muted-foreground">
-            <Wand2 className="size-3.5 text-primary" /> How it works
-          </span>
-          <h2 className="mt-5 text-3xl font-semibold tracking-tight sm:text-4xl">
-            You act as editor-in-chief.
-            <br />
-            <span className="text-muted-foreground">Not content creator.</span>
-          </h2>
-        </motion.div>
+          <Reveal className="mx-auto max-w-xl text-center">
+            <span className="inline-flex items-center gap-1.5 rounded-full border border-border bg-secondary/60 px-3 py-1 text-[12px] font-medium text-muted-foreground">
+              <Wand2 className="size-3.5 text-primary" /> How it works
+            </span>
+            <h2 className="mt-5 text-3xl font-semibold tracking-tight sm:text-4xl">
+              You act as editor-in-chief.
+              <br />
+              <span className="text-muted-foreground">Not content creator.</span>
+            </h2>
+          </Reveal>
         </Parallax>
 
         <div className="relative mt-14">
-          {/* connective line drawing in */}
-          <motion.div
-            aria-hidden
-            initial={{ scaleX: 0 }}
-            whileInView={{ scaleX: 1 }}
-            viewport={{ once: true, margin: "-100px" }}
-            transition={{ duration: 0.9, ease: [0.22, 1, 0.36, 1] }}
-            className="absolute left-0 right-0 top-[2.75rem] hidden h-px origin-left bg-gradient-to-r from-transparent via-primary/40 to-transparent md:block"
-          />
+          {/* connective line — scrubbed in with scroll */}
+          <ScrubLine className="absolute left-0 right-0 top-[2.75rem] hidden h-px origin-left bg-gradient-to-r from-transparent via-primary/40 to-transparent md:block" />
           <div className="grid grid-cols-1 gap-4 md:grid-cols-3">
             {STEPS.map((s, i) => (
-              <motion.div
+              <Reveal
                 key={s.step}
-                initial="hidden"
-                whileInView="show"
-                viewport={{ once: true, margin: "-60px" }}
-                variants={fadeUp}
-                transition={{ duration: 0.55, delay: i * 0.12, ease: [0.22, 1, 0.36, 1] }}
+                index={i}
+                y={54}
                 className="card-hover relative overflow-hidden rounded-2xl border border-border/80 bg-card p-6"
               >
                 <span className="absolute right-5 top-4 text-[40px] font-semibold tracking-tight text-foreground/[0.06] tnum">
@@ -257,7 +228,7 @@ export function LandingPage({ configured }: { configured: boolean }) {
                 </div>
                 <h3 className="mt-4 text-[16px] font-semibold tracking-tight">{s.title}</h3>
                 <p className="mt-2 text-[13.5px] leading-relaxed text-muted-foreground">{s.body}</p>
-              </motion.div>
+              </Reveal>
             ))}
           </div>
         </div>
@@ -265,25 +236,19 @@ export function LandingPage({ configured }: { configured: boolean }) {
 
       {/* ── Stats band ─────────────────────────────────────────────────── */}
       <section className="relative overflow-hidden border-y border-border/60 bg-sidebar/50">
-        <div
-          aria-hidden
-          className="pointer-events-none absolute inset-0 opacity-[0.5]"
-          style={{
-            background:
-              "radial-gradient(60% 120% at 50% 0%, color-mix(in oklch, var(--color-primary) 12%, transparent), transparent 70%)",
-          }}
-        />
+        <Parallax offset={60} className="pointer-events-none absolute inset-0">
+          <div
+            aria-hidden
+            className="absolute inset-0 opacity-[0.5]"
+            style={{
+              background:
+                "radial-gradient(60% 120% at 50% 0%, color-mix(in oklch, var(--color-primary) 14%, transparent), transparent 70%)",
+            }}
+          />
+        </Parallax>
         <div className="relative mx-auto grid max-w-6xl grid-cols-2 gap-y-10 px-4 py-16 sm:px-6 md:grid-cols-4">
           {STATS.map((s, i) => (
-            <motion.div
-              key={s.label}
-              initial="hidden"
-              whileInView="show"
-              viewport={{ once: true, margin: "-40px" }}
-              variants={fadeUp}
-              transition={{ duration: 0.5, delay: i * 0.08 }}
-              className="text-center"
-            >
+            <Reveal key={s.label} index={i} y={30} scale={0.82} className="text-center">
               <div className="text-4xl font-semibold tracking-tight sm:text-5xl">
                 <span className="bg-gradient-to-br from-foreground to-foreground/60 bg-clip-text text-transparent">
                   <Counter to={s.to} suffix={s.suffix} decimals={s.decimals} />
@@ -292,7 +257,7 @@ export function LandingPage({ configured }: { configured: boolean }) {
               <p className="mt-2 text-[12.5px] font-medium uppercase tracking-[0.12em] text-muted-foreground">
                 {s.label}
               </p>
-            </motion.div>
+            </Reveal>
           ))}
         </div>
       </section>
@@ -301,71 +266,64 @@ export function LandingPage({ configured }: { configured: boolean }) {
       <section id="pipeline" className="relative scroll-mt-24 py-24">
         <div className="mx-auto max-w-6xl px-4 sm:px-6">
           <Parallax offset={30}>
-          <motion.div {...reveal} className="mx-auto max-w-xl text-center">
-            <span className="inline-flex items-center gap-1.5 rounded-full border border-border bg-secondary/60 px-3 py-1 text-[12px] font-medium text-muted-foreground">
-              <Zap className="size-3.5 text-primary" /> The loop
-            </span>
-            <h2 className="mt-5 text-3xl font-semibold tracking-tight sm:text-4xl">One unbroken loop</h2>
-            <p className="mt-3 text-[14.5px] leading-relaxed text-muted-foreground">
-              Eleven pipeline stages run end-to-end — and the analytics feed back into the ideas,
-              so the system gets sharper with every post.
-            </p>
-          </motion.div>
+            <Reveal className="mx-auto max-w-xl text-center">
+              <span className="inline-flex items-center gap-1.5 rounded-full border border-border bg-secondary/60 px-3 py-1 text-[12px] font-medium text-muted-foreground">
+                <Zap className="size-3.5 text-primary" /> The loop
+              </span>
+              <h2 className="mt-5 text-3xl font-semibold tracking-tight sm:text-4xl">One unbroken loop</h2>
+              <p className="mt-3 text-[14.5px] leading-relaxed text-muted-foreground">
+                Eleven pipeline stages run end-to-end — and the analytics feed back into the ideas,
+                so the system gets sharper with every post.
+              </p>
+            </Reveal>
           </Parallax>
 
-          <div className="mt-12 flex flex-wrap items-center justify-center gap-x-2 gap-y-4">
-            {PIPELINE.map((step, i) => (
-              <motion.div
-                key={step.label}
-                initial={{ opacity: 0, scale: 0.9, y: 10 }}
-                whileInView={{ opacity: 1, scale: 1, y: 0 }}
-                viewport={{ once: true, margin: "-40px" }}
-                transition={{ duration: 0.4, delay: i * 0.09, ease: [0.22, 1, 0.36, 1] }}
-                className="flex items-center gap-2"
-              >
-                <div className="card-hover flex items-center gap-2 rounded-xl border border-border bg-card px-3.5 py-2.5 shadow-sm">
-                  <step.icon className="size-4 text-primary" />
-                  <span className="text-[13px] font-medium">{step.label}</span>
-                </div>
-                {i < PIPELINE.length - 1 && (
-                  <ArrowRight className="size-3.5 text-muted-foreground/50" />
-                )}
-              </motion.div>
-            ))}
-          </div>
-          <motion.p {...reveal} className="mt-8 text-center text-[12.5px] text-muted-foreground">
+          {/* the rail slides horizontally as you scroll past it */}
+          <ScrubX from="7%" to="-7%" className="mt-12">
+            <div className="flex flex-wrap items-center justify-center gap-x-2 gap-y-4">
+              {PIPELINE.map((step, i) => (
+                <Reveal key={step.label} index={i} y={16} scale={0.9} className="flex items-center gap-2">
+                  <div className="card-hover flex items-center gap-2 rounded-xl border border-border bg-card px-3.5 py-2.5 shadow-sm">
+                    <step.icon className="size-4 text-primary" />
+                    <span className="text-[13px] font-medium">{step.label}</span>
+                  </div>
+                  {i < PIPELINE.length - 1 && (
+                    <ArrowRight className="size-3.5 text-muted-foreground/50" />
+                  )}
+                </Reveal>
+              ))}
+            </div>
+          </ScrubX>
+          <Reveal className="mt-8 text-center text-[12.5px] text-muted-foreground">
             Approve in one swipe. Everything else is automatic.
-          </motion.p>
+          </Reveal>
         </div>
       </section>
 
       {/* ── Features bento ─────────────────────────────────────────────── */}
       <section id="platform" className="mx-auto max-w-6xl scroll-mt-24 px-4 py-24 sm:px-6">
         <Parallax offset={30}>
-        <motion.div {...reveal} className="mx-auto max-w-xl text-center">
-          <span className="inline-flex items-center gap-1.5 rounded-full border border-border bg-secondary/60 px-3 py-1 text-[12px] font-medium text-muted-foreground">
-            <Layers className="size-3.5 text-primary" /> The platform
-          </span>
-          <h2 className="mt-5 text-3xl font-semibold tracking-tight sm:text-4xl">
-            A full department, not a tool
-          </h2>
-          <p className="mt-3 text-[14.5px] leading-relaxed text-muted-foreground">
-            Built for creators, agencies and marketing teams who need volume without losing the brand.
-          </p>
-        </motion.div>
+          <Reveal className="mx-auto max-w-xl text-center">
+            <span className="inline-flex items-center gap-1.5 rounded-full border border-border bg-secondary/60 px-3 py-1 text-[12px] font-medium text-muted-foreground">
+              <Layers className="size-3.5 text-primary" /> The platform
+            </span>
+            <h2 className="mt-5 text-3xl font-semibold tracking-tight sm:text-4xl">
+              A full department, not a tool
+            </h2>
+            <p className="mt-3 text-[14.5px] leading-relaxed text-muted-foreground">
+              Built for creators, agencies and marketing teams who need volume without losing the brand.
+            </p>
+          </Reveal>
         </Parallax>
 
         <div className="mt-14 grid grid-cols-1 gap-4 lg:grid-cols-3">
           {/* feature list — spans two columns */}
           <div className="grid gap-4 sm:grid-cols-2 lg:col-span-2">
             {FEATURES.map((f, i) => (
-              <motion.div
+              <Reveal
                 key={f.title}
-                initial="hidden"
-                whileInView="show"
-                viewport={{ once: true, margin: "-60px" }}
-                variants={fadeUp}
-                transition={{ duration: 0.5, delay: i * 0.08 }}
+                index={i}
+                y={48}
                 className="card-hover group rounded-2xl border border-border/80 bg-card p-6"
               >
                 <div className="flex size-10 items-center justify-center rounded-xl bg-secondary transition-colors group-hover:bg-primary/12">
@@ -373,61 +331,63 @@ export function LandingPage({ configured }: { configured: boolean }) {
                 </div>
                 <h3 className="mt-4 text-[16px] font-semibold tracking-tight">{f.title}</h3>
                 <p className="mt-2 text-[13.5px] leading-relaxed text-muted-foreground">{f.body}</p>
-              </motion.div>
+              </Reveal>
             ))}
           </div>
 
-          {/* live output card */}
-          <motion.div
-            initial="hidden"
-            whileInView="show"
-            viewport={{ once: true, margin: "-60px" }}
-            variants={fadeUp}
-            transition={{ duration: 0.55, delay: 0.1 }}
-            className="relative overflow-hidden rounded-2xl border border-border/80 bg-card p-5"
-          >
-            <div className="flex items-center justify-between">
-              <div className="flex items-center gap-2">
-                <span className="flex size-2 items-center justify-center">
-                  <span className="absolute size-2 animate-ping rounded-full bg-success/70" />
-                  <span className="size-2 rounded-full bg-success" />
-                </span>
-                <span className="text-[12.5px] font-medium">Queue · live</span>
+          {/* live output card — parallax float */}
+          <Parallax offset={34}>
+            <Reveal
+              scale={0.95}
+              className="relative overflow-hidden rounded-2xl border border-border/80 bg-card p-5"
+            >
+              <div className="flex items-center justify-between">
+                <div className="flex items-center gap-2">
+                  <span className="flex size-2 items-center justify-center">
+                    <span className="absolute size-2 animate-ping rounded-full bg-success/70" />
+                    <span className="size-2 rounded-full bg-success" />
+                  </span>
+                  <span className="text-[12.5px] font-medium">Queue · live</span>
+                </div>
+                <span className="text-[11px] text-muted-foreground">rendering</span>
               </div>
-              <span className="text-[11px] text-muted-foreground">rendering</span>
-            </div>
-            <div className="mt-4 grid grid-cols-2 gap-3">
-              {rotate(SHOWCASE, 5)
-                .slice(0, 2)
-                .map((v, i) => (
-                  <VideoTile
-                    key={v.id}
-                    video={v}
-                    priority={i === 0}
-                    showMeta
-                    rounded="rounded-xl"
-                  />
-                ))}
-            </div>
-            <p className="mt-4 text-[12.5px] leading-relaxed text-muted-foreground">
-              Fresh renders drop into your queue while you sleep. Approve the
-              keepers with a swipe.
-            </p>
-          </motion.div>
+              <div className="mt-4 grid grid-cols-2 gap-3">
+                {rotate(SHOWCASE, 5)
+                  .slice(0, 2)
+                  .map((v, i) => (
+                    <VideoTile
+                      key={v.id}
+                      video={v}
+                      priority={i === 0}
+                      showMeta
+                      rounded="rounded-xl"
+                    />
+                  ))}
+              </div>
+              <p className="mt-4 text-[12.5px] leading-relaxed text-muted-foreground">
+                Fresh renders drop into your queue while you sleep. Approve the
+                keepers with a swipe.
+              </p>
+            </Reveal>
+          </Parallax>
         </div>
       </section>
 
       {/* ── Final CTA ──────────────────────────────────────────────────── */}
       <section className="mx-auto max-w-6xl px-4 pb-24 sm:px-6">
-        <motion.div
-          {...reveal}
-          transition={{ duration: 0.6 }}
+        <Reveal
+          y={60}
+          scale={0.94}
           className="relative overflow-hidden rounded-3xl border border-primary/25 px-6 py-20 text-center sm:px-12"
-          style={{
-            background:
-              "radial-gradient(110% 140% at 50% 0%, color-mix(in oklch, var(--color-primary) 16%, var(--color-card)) 0%, var(--color-card) 60%)",
-          }}
         >
+          <div
+            aria-hidden
+            className="absolute inset-0"
+            style={{
+              background:
+                "radial-gradient(110% 140% at 50% 0%, color-mix(in oklch, var(--color-primary) 16%, var(--color-card)) 0%, var(--color-card) 60%)",
+            }}
+          />
           <div
             aria-hidden
             className="conic-glow animate-spin-slow pointer-events-none absolute -top-40 left-1/2 h-80 w-[560px] -translate-x-1/2 rounded-full opacity-20 blur-3xl"
@@ -450,7 +410,7 @@ export function LandingPage({ configured }: { configured: boolean }) {
               </Button>
             </div>
           </div>
-        </motion.div>
+        </Reveal>
       </section>
 
       {/* ── Footer ─────────────────────────────────────────────────────── */}
