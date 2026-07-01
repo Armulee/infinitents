@@ -14,13 +14,20 @@
 export const SHOWCASE_CDN =
   "https://d8j0ntlcm91z4.cloudfront.net/user_3CaRHaYnN5FE3EhZ5CJNJcjCJR9";
 
+// Committed placeholder clips (real H.264 video, checked into /public/showcase)
+// so the wall *always* plays something the moment the site loads. Each tile
+// falls back to one of these if its own clip hasn't been fetched yet.
+const STOCK = ["/showcase/stock-1.mp4", "/showcase/stock-2.mp4"];
+
 export type ShowcaseVideo = {
   id: string;
-  /** Local path served from /public — what the app actually plays. */
+  /** Local path served from /public — what the app tries first. */
   src: string;
+  /** Committed placeholder played if `src` isn't present yet. */
+  fallback: string;
   /** CDN source the fetch script downloads into /public/showcase. */
   remote: string;
-  /** Gradient shown before the clip can play — also the reduced-motion still. */
+  /** Gradient shown before any clip can play — also the reduced-motion still. */
   poster: string;
   /** Short label rendered on the tile. */
   label: string;
@@ -28,6 +35,7 @@ export type ShowcaseVideo = {
   caption: string;
 };
 
+let stockCursor = 0;
 function clip(
   id: string,
   file: string,
@@ -35,9 +43,11 @@ function clip(
   label: string,
   caption: string,
 ): ShowcaseVideo {
+  const fallback = STOCK[stockCursor++ % STOCK.length];
   return {
     id,
     src: `/showcase/${id}.mp4`,
+    fallback,
     remote: `${SHOWCASE_CDN}/${file}`,
     poster,
     label,

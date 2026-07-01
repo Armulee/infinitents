@@ -36,6 +36,9 @@ export function VideoTile({
   const videoRef = useRef<HTMLVideoElement>(null);
   const [active, setActive] = useState(priority);
   const [ready, setReady] = useState(false);
+  // Start with the tile's own clip; if it 404s / can't decode, drop to the
+  // committed placeholder so the tile still plays real video.
+  const [src, setSrc] = useState(video.src);
 
   // Mount/play only while near the viewport.
   useEffect(() => {
@@ -76,7 +79,9 @@ export function VideoTile({
     >
       {mountVideo && (
         <video
+          key={src}
           ref={videoRef}
+          src={src}
           muted
           loop
           playsInline
@@ -85,13 +90,17 @@ export function VideoTile({
             setReady(true);
             e.currentTarget.play().catch(() => {});
           }}
+          onError={() => {
+            if (src !== video.fallback) {
+              setReady(false);
+              setSrc(video.fallback);
+            }
+          }}
           className={cn(
             "absolute inset-0 size-full object-cover transition-opacity duration-700",
             ready ? "opacity-100" : "opacity-0",
           )}
-        >
-          <source src={video.src} type="video/mp4" />
-        </video>
+        />
       )}
 
       {/* Living light-sweep — keeps the tile cinematic before/without video.
