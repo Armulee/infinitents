@@ -49,7 +49,7 @@ export function VideoTile({
     );
     io.observe(el);
     return () => io.disconnect();
-  }, [prefersReducedMotion]);
+  }, [prefersReducedMotion, still]);
 
   // Drive play/pause off `active` so offscreen tiles stop decoding.
   useEffect(() => {

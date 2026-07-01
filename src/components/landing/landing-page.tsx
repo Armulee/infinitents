@@ -18,7 +18,6 @@ import {
   GraduationCap,
   Inbox,
   Layers,
-  Play,
   Send,
   ShieldCheck,
   Sparkles,
@@ -28,17 +27,13 @@ import {
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { LogoMark, Wordmark } from "@/components/shell/logo";
-import { PlatformIcon } from "@/components/publishing/platform-icons";
-import type { Platform } from "@/lib/types";
-import { HeroVideo } from "./hero-video";
+import { HeroScroll } from "./hero-scroll";
 import { ShowcaseReel } from "./video-wall";
 import { VideoTile } from "./video-tile";
 import { BatchScroll } from "./batch-scroll";
 import { Counter } from "./counter";
 import { Parallax } from "./parallax";
 import { SHOWCASE, rotate } from "./showcase-data";
-
-const PLATFORMS: Platform[] = ["tiktok", "instagram", "youtube", "facebook"];
 
 const PIPELINE = [
   { icon: Brain, label: "Brand Brain" },
@@ -188,115 +183,8 @@ export function LandingPage({ configured }: { configured: boolean }) {
         </div>
       </header>
 
-      {/* ── Hero ───────────────────────────────────────────────────────── */}
-      <section className="relative flex min-h-[100dvh] items-center overflow-hidden">
-        <HeroVideo />
-
-        <div className="relative z-10 mx-auto w-full max-w-6xl px-4 pb-24 pt-32 sm:px-6">
-          <div className="mx-auto flex max-w-3xl flex-col items-center text-center">
-            <motion.div
-              initial={{ opacity: 0, y: 14 }}
-              animate={{ opacity: 1, y: 0 }}
-              transition={{ duration: 0.5, ease: [0.25, 0.1, 0.25, 1] }}
-              className="glass inline-flex items-center gap-2 rounded-full border border-border/60 px-3.5 py-1.5 text-[12.5px] font-medium text-foreground/80"
-            >
-              <span className="relative flex size-1.5">
-                <span className="absolute inline-flex size-full animate-ping rounded-full bg-success opacity-75" />
-                <span className="relative inline-flex size-1.5 rounded-full bg-success" />
-              </span>
-              Auto-batch AI video generation, running 24/7
-            </motion.div>
-
-            <motion.h1
-              initial={{ opacity: 0, y: 18 }}
-              animate={{ opacity: 1, y: 0 }}
-              transition={{ duration: 0.55, delay: 0.08, ease: [0.25, 0.1, 0.25, 1] }}
-              className="mt-7 text-balance text-[2.7rem] font-semibold leading-[1.03] tracking-tight sm:text-6xl lg:text-[4.5rem]"
-            >
-              Generate a{" "}
-              <span className="bg-gradient-to-br from-primary via-[oklch(0.72_0.16_300)] to-[oklch(0.74_0.14_250)] bg-clip-text text-transparent">
-                week of video
-              </span>
-              <br className="hidden sm:block" /> in a single batch.
-            </motion.h1>
-
-            <motion.p
-              initial={{ opacity: 0, y: 18 }}
-              animate={{ opacity: 1, y: 0 }}
-              transition={{ duration: 0.55, delay: 0.16, ease: [0.25, 0.1, 0.25, 1] }}
-              className="mt-6 max-w-xl text-balance text-[15.5px] leading-relaxed text-foreground/75 sm:text-lg"
-            >
-              Infinitents researches, scripts, renders, edits and publishes
-              short- and long-form video — automatically, in batches. You don&apos;t
-              manage AI. You manage outcomes.
-            </motion.p>
-
-            <motion.div
-              initial={{ opacity: 0, y: 18 }}
-              animate={{ opacity: 1, y: 0 }}
-              transition={{ duration: 0.55, delay: 0.24, ease: [0.25, 0.1, 0.25, 1] }}
-              className="mt-9 flex flex-col items-center gap-3 sm:flex-row"
-            >
-              <Button
-                size="lg"
-                asChild
-                disabled={!configured}
-                className="h-12 rounded-full px-7 text-[15px] shadow-[0_12px_40px_-12px_color-mix(in_oklch,var(--color-primary)_70%,transparent)]"
-              >
-                <Link href={configured ? "/login?mode=signup" : "#how-it-works"}>
-                  Give me videos every day <ArrowRight />
-                </Link>
-              </Button>
-              <Button
-                size="lg"
-                variant="ghost"
-                asChild
-                className="glass h-12 rounded-full border border-border/60 px-6"
-              >
-                <a href="#batch">
-                  <Play className="fill-current" /> Watch a batch
-                </a>
-              </Button>
-            </motion.div>
-
-            <motion.div
-              initial={{ opacity: 0 }}
-              animate={{ opacity: 1 }}
-              transition={{ duration: 0.8, delay: 0.45 }}
-              className="mt-14 flex flex-col items-center gap-3"
-            >
-              <span className="text-[11px] font-medium uppercase tracking-[0.18em] text-foreground/50">
-                Publishes natively to
-              </span>
-              <div className="glass flex items-center gap-6 rounded-2xl border border-border/60 px-6 py-3.5">
-                {PLATFORMS.map((p) => (
-                  <PlatformIcon
-                    key={p}
-                    platform={p}
-                    className="size-5 opacity-80 saturate-[0.85] transition-all hover:opacity-100 hover:saturate-100"
-                  />
-                ))}
-              </div>
-            </motion.div>
-          </div>
-        </div>
-
-        {/* scroll cue */}
-        <motion.div
-          initial={{ opacity: 0 }}
-          animate={{ opacity: 1 }}
-          transition={{ delay: 1, duration: 0.8 }}
-          className="absolute inset-x-0 bottom-6 z-10 flex justify-center"
-        >
-          <div className="flex h-9 w-5 items-start justify-center rounded-full border border-foreground/20 p-1">
-            <motion.span
-              animate={{ y: [0, 10, 0], opacity: [1, 0.2, 1] }}
-              transition={{ duration: 1.8, repeat: Infinity, ease: "easeInOut" }}
-              className="size-1 rounded-full bg-foreground/60"
-            />
-          </div>
-        </motion.div>
-      </section>
+      {/* ── Hero (pinned, scroll-scrubbed) ─────────────────────────────── */}
+      <HeroScroll configured={configured} />
 
       {/* ── Living showcase rail ───────────────────────────────────────── */}
       <section className="relative overflow-hidden border-y border-border/60 bg-black py-14 sm:py-16">
