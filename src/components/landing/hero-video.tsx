@@ -9,13 +9,17 @@ import {
 } from "framer-motion";
 import { cn } from "@/lib/utils";
 import { VideoTile } from "./video-tile";
-import { SHOWCASE, rotate, type ShowcaseVideo } from "./showcase-data";
+import { SHOWCASE, type ShowcaseVideo } from "./showcase-data";
 
 /**
  * Cinematic hero backdrop: a tilted wall of vertical clips drifting on
- * opposing rails, washed with an aurora + conic glow and scrimmed so the
- * headline stays crisp. The whole wall parallaxes as the page scrolls.
- * Reduced-motion users get the static gradient posters (no drift, no playback).
+ * opposing rails. Scrims are deliberately light and *localized* — a soft
+ * pool of darkness sits only behind the headline, so the wall stays vivid
+ * across the top and sides instead of being washed flat. The whole wall
+ * parallaxes and fades as the page scrolls.
+ *
+ * Each column carries a small slice of the reel (3 clips) so the total number
+ * of decoding <video> elements stays modest and playback is reliable.
  */
 
 function VerticalColumn({
@@ -43,6 +47,7 @@ function VerticalColumn({
                 key={`${copy}-${v.id}`}
                 video={v}
                 showMeta={false}
+                still={copy === 1}
                 rounded="rounded-xl"
                 className="w-full"
               />
@@ -54,6 +59,19 @@ function VerticalColumn({
   );
 }
 
+// 5 columns, each a distinct trio → ~15 unique tiles, opposing drift.
+const COLUMNS: {
+  videos: ShowcaseVideo[];
+  direction: "up" | "down";
+  duration: number;
+}[] = [
+  { videos: [SHOWCASE[0], SHOWCASE[5], SHOWCASE[2]], direction: "up", duration: 46 },
+  { videos: [SHOWCASE[3], SHOWCASE[1], SHOWCASE[6]], direction: "down", duration: 54 },
+  { videos: [SHOWCASE[4], SHOWCASE[0], SHOWCASE[3]], direction: "up", duration: 50 },
+  { videos: [SHOWCASE[6], SHOWCASE[2], SHOWCASE[5]], direction: "down", duration: 58 },
+  { videos: [SHOWCASE[1], SHOWCASE[4], SHOWCASE[0]], direction: "up", duration: 52 },
+];
+
 export function HeroVideo() {
   const prefersReducedMotion = useReducedMotion();
   const ref = useRef<HTMLDivElement>(null);
@@ -61,18 +79,9 @@ export function HeroVideo() {
     target: ref,
     offset: ["start start", "end start"],
   });
-  const y = useTransform(scrollYProgress, [0, 1], ["0%", "24%"]);
-  const scale = useTransform(scrollYProgress, [0, 1], [1, 1.08]);
-  const opacity = useTransform(scrollYProgress, [0, 0.8], [1, 0]);
-
-  const columns = [
-    { videos: rotate(SHOWCASE, 0), direction: "up" as const, duration: 44 },
-    { videos: rotate(SHOWCASE, 2), direction: "down" as const, duration: 52 },
-    { videos: rotate(SHOWCASE, 4), direction: "up" as const, duration: 48 },
-    { videos: rotate(SHOWCASE, 6), direction: "down" as const, duration: 58 },
-    { videos: rotate(SHOWCASE, 1), direction: "up" as const, duration: 50 },
-    { videos: rotate(SHOWCASE, 3), direction: "down" as const, duration: 46 },
-  ];
+  const y = useTransform(scrollYProgress, [0, 1], ["0%", "22%"]);
+  const scale = useTransform(scrollYProgress, [0, 1], [1, 1.12]);
+  const opacity = useTransform(scrollYProgress, [0, 0.85], [1, 0]);
 
   return (
     <div ref={ref} aria-hidden className="absolute inset-0 overflow-hidden">
@@ -81,53 +90,62 @@ export function HeroVideo() {
         className="absolute inset-0"
         style={{
           background:
-            "radial-gradient(120% 90% at 50% 0%, oklch(0.3 0.09 282) 0%, oklch(0.2 0.04 285) 44%, oklch(0.156 0.005 285) 100%)",
+            "radial-gradient(120% 90% at 50% 0%, oklch(0.28 0.09 282) 0%, oklch(0.19 0.04 285) 46%, oklch(0.152 0.005 285) 100%)",
         }}
       />
 
       {/* tilted video wall */}
       {!prefersReducedMotion && (
-        <motion.div
-          style={{ y, scale, opacity }}
-          className="perspective-deep absolute inset-0"
-        >
+        <motion.div style={{ y, scale, opacity }} className="perspective-deep absolute inset-0">
           <div
-            className="absolute left-1/2 top-1/2 grid h-[150%] w-[135%] -translate-x-1/2 -translate-y-1/2 grid-cols-3 gap-3 sm:grid-cols-4 lg:grid-cols-6"
+            className="absolute left-1/2 top-1/2 grid h-[168%] w-[150%] -translate-x-1/2 -translate-y-1/2 grid-cols-3 gap-3 sm:grid-cols-5"
             style={{
               transform:
-                "translate(-50%, -50%) rotateX(14deg) rotateZ(-8deg) scale(1.05)",
+                "translate(-50%, -50%) rotateX(11deg) rotateZ(-7deg) scale(1.04)",
             }}
           >
-            {columns.map((c, i) => (
-              <VerticalColumn key={i} {...c} />
+            {COLUMNS.map((c, i) => (
+              // On phones only the first 3 columns render (3-col grid);
+              // the outer two appear from sm up (5-col grid).
+              <div key={i} className={cn("h-full", i >= 3 && "hidden sm:block")}>
+                <VerticalColumn {...c} />
+              </div>
             ))}
           </div>
         </motion.div>
       )}
 
-      {/* aurora blobs */}
+      {/* aurora blobs — colour on top of the wall, screen-blended */}
       <div
         aria-hidden
-        className="animate-aurora pointer-events-none absolute -left-1/4 top-0 h-[70%] w-[70%] rounded-full opacity-60 blur-3xl mix-blend-screen"
-        style={{
-          background:
-            "radial-gradient(closest-side, oklch(0.55 0.2 285), transparent)",
-        }}
+        className="animate-aurora pointer-events-none absolute -left-1/4 top-0 h-[70%] w-[70%] rounded-full opacity-40 blur-3xl mix-blend-screen"
+        style={{ background: "radial-gradient(closest-side, oklch(0.55 0.2 285), transparent)" }}
       />
       <div
         aria-hidden
-        className="animate-aurora pointer-events-none absolute -right-1/4 top-1/4 h-[60%] w-[60%] rounded-full opacity-50 blur-3xl mix-blend-screen"
+        className="animate-aurora pointer-events-none absolute -right-1/4 top-1/4 h-[60%] w-[60%] rounded-full opacity-35 blur-3xl mix-blend-screen"
         style={{
-          background:
-            "radial-gradient(closest-side, oklch(0.6 0.16 320), transparent)",
+          background: "radial-gradient(closest-side, oklch(0.6 0.16 320), transparent)",
           animationDelay: "-8s",
         }}
       />
 
-      {/* scrims — keep the headline readable over any frame */}
-      <div className="absolute inset-0 bg-gradient-to-b from-background/55 via-background/72 to-background" />
-      <div className="absolute inset-0 bg-[radial-gradient(80%_65%_at_50%_42%,transparent_0%,color-mix(in_oklch,var(--color-background)_82%,transparent)_100%)]" />
-      <div className="grain-overlay pointer-events-none absolute inset-0 opacity-[0.15]" />
+      {/* ── Localized scrims — keep the wall vivid, text still crisp ──────── */}
+      {/* nav legibility, top only */}
+      <div className="pointer-events-none absolute inset-x-0 top-0 h-36 bg-gradient-to-b from-background/85 via-background/40 to-transparent" />
+      {/* seat the hero onto the page, bottom only */}
+      <div className="pointer-events-none absolute inset-x-0 bottom-0 h-2/5 bg-gradient-to-b from-transparent to-background" />
+      {/* soft pool of dark behind the headline block */}
+      <div
+        className="pointer-events-none absolute inset-0"
+        style={{
+          background:
+            "radial-gradient(48% 46% at 50% 47%, color-mix(in oklch, var(--color-background) 72%, transparent) 0%, color-mix(in oklch, var(--color-background) 24%, transparent) 46%, transparent 74%)",
+        }}
+      />
+      {/* faint edge vignette */}
+      <div className="pointer-events-none absolute inset-0 bg-[radial-gradient(125%_105%_at_50%_50%,transparent_62%,color-mix(in_oklch,var(--color-background)_88%,transparent)_100%)]" />
+      <div className="grain-overlay pointer-events-none absolute inset-0 opacity-[0.12]" />
 
       {/* hairline that seats the hero onto the page */}
       <div className="absolute inset-x-0 bottom-0 h-px bg-gradient-to-r from-transparent via-border to-transparent" />

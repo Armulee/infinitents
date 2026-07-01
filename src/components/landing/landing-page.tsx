@@ -31,10 +31,11 @@ import { LogoMark, Wordmark } from "@/components/shell/logo";
 import { PlatformIcon } from "@/components/publishing/platform-icons";
 import type { Platform } from "@/lib/types";
 import { HeroVideo } from "./hero-video";
-import { VideoRail } from "./video-wall";
+import { ShowcaseReel } from "./video-wall";
 import { VideoTile } from "./video-tile";
 import { BatchScroll } from "./batch-scroll";
 import { Counter } from "./counter";
+import { Parallax } from "./parallax";
 import { SHOWCASE, rotate } from "./showcase-data";
 
 const PLATFORMS: Platform[] = ["tiktok", "instagram", "youtube", "facebook"];
@@ -316,10 +317,7 @@ export function LandingPage({ configured }: { configured: boolean }) {
           </motion.div>
         </div>
 
-        <div className="space-y-3 sm:space-y-4">
-          <VideoRail videos={rotate(SHOWCASE, 0)} direction="left" duration={55} />
-          <VideoRail videos={rotate(SHOWCASE, 3)} direction="right" duration={68} showMeta />
-        </div>
+        <ShowcaseReel />
       </section>
 
       {/* ── Pinned batch scroll ────────────────────────────────────────── */}
@@ -329,6 +327,7 @@ export function LandingPage({ configured }: { configured: boolean }) {
 
       {/* ── How it works ───────────────────────────────────────────────── */}
       <section id="how-it-works" className="relative mx-auto max-w-6xl scroll-mt-24 px-4 py-24 sm:px-6">
+        <Parallax offset={36}>
         <motion.div {...reveal} className="mx-auto max-w-xl text-center">
           <span className="inline-flex items-center gap-1.5 rounded-full border border-border bg-secondary/60 px-3 py-1 text-[12px] font-medium text-muted-foreground">
             <Wand2 className="size-3.5 text-primary" /> How it works
@@ -339,6 +338,7 @@ export function LandingPage({ configured }: { configured: boolean }) {
             <span className="text-muted-foreground">Not content creator.</span>
           </h2>
         </motion.div>
+        </Parallax>
 
         <div className="relative mt-14">
           {/* connective line drawing in */}
@@ -412,6 +412,7 @@ export function LandingPage({ configured }: { configured: boolean }) {
       {/* ── Pipeline ───────────────────────────────────────────────────── */}
       <section id="pipeline" className="relative scroll-mt-24 py-24">
         <div className="mx-auto max-w-6xl px-4 sm:px-6">
+          <Parallax offset={30}>
           <motion.div {...reveal} className="mx-auto max-w-xl text-center">
             <span className="inline-flex items-center gap-1.5 rounded-full border border-border bg-secondary/60 px-3 py-1 text-[12px] font-medium text-muted-foreground">
               <Zap className="size-3.5 text-primary" /> The loop
@@ -422,6 +423,7 @@ export function LandingPage({ configured }: { configured: boolean }) {
               so the system gets sharper with every post.
             </p>
           </motion.div>
+          </Parallax>
 
           <div className="mt-12 flex flex-wrap items-center justify-center gap-x-2 gap-y-4">
             {PIPELINE.map((step, i) => (
@@ -451,6 +453,7 @@ export function LandingPage({ configured }: { configured: boolean }) {
 
       {/* ── Features bento ─────────────────────────────────────────────── */}
       <section id="platform" className="mx-auto max-w-6xl scroll-mt-24 px-4 py-24 sm:px-6">
+        <Parallax offset={30}>
         <motion.div {...reveal} className="mx-auto max-w-xl text-center">
           <span className="inline-flex items-center gap-1.5 rounded-full border border-border bg-secondary/60 px-3 py-1 text-[12px] font-medium text-muted-foreground">
             <Layers className="size-3.5 text-primary" /> The platform
@@ -462,6 +465,7 @@ export function LandingPage({ configured }: { configured: boolean }) {
             Built for creators, agencies and marketing teams who need volume without losing the brand.
           </p>
         </motion.div>
+        </Parallax>
 
         <div className="mt-14 grid grid-cols-1 gap-4 lg:grid-cols-3">
           {/* feature list — spans two columns */}

@@ -20,12 +20,16 @@ export function VideoTile({
   rounded = "rounded-2xl",
   showMeta = true,
   priority = false,
+  still = false,
 }: {
   video: ShowcaseVideo;
   className?: string;
   rounded?: string;
   showMeta?: boolean;
   priority?: boolean;
+  /** Poster-only tile — never mounts a <video>. Used for duplicated marquee
+   *  halves so a seamless loop doesn't double the decoder count. */
+  still?: boolean;
 }) {
   const prefersReducedMotion = useReducedMotion();
   const wrapRef = useRef<HTMLDivElement>(null);
@@ -35,7 +39,7 @@ export function VideoTile({
 
   // Mount/play only while near the viewport.
   useEffect(() => {
-    if (prefersReducedMotion) return;
+    if (prefersReducedMotion || still) return;
     const el = wrapRef.current;
     if (!el) return;
 
@@ -58,7 +62,7 @@ export function VideoTile({
     }
   }, [active]);
 
-  const mountVideo = active && !prefersReducedMotion;
+  const mountVideo = active && !prefersReducedMotion && !still;
 
   return (
     <div
