@@ -5,10 +5,12 @@
   "description": "The Operating System for Content Growth — AI-powered content department that researches, plans, generates, edits, publishes, and learns.",
   "scripts": {
     "dev": "next dev",
+    "prebuild": "tsx scripts/fetch-showcase.ts || true",
     "build": "next build",
     "start": "next start",
     "lint": "next lint",
     "typecheck": "tsc --noEmit",
+    "fetch:showcase": "tsx scripts/fetch-showcase.ts",
     "seed": "tsx scripts/seed.ts",
     "worker": "tsx scripts/worker.ts"
   },
