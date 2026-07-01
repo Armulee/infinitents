@@ -17,10 +17,19 @@ import { PlatformIcon } from "@/components/publishing/platform-icons";
 import { cn } from "@/lib/utils";
 import type { Platform } from "@/lib/types";
 import { VideoTile } from "./video-tile";
+import { Typewriter } from "./typewriter";
 import { SHOWCASE, type ShowcaseVideo } from "./showcase-data";
 
 const PLATFORMS: Platform[] = ["tiktok", "instagram", "youtube", "facebook"];
 const EASE = [0.22, 1, 0.36, 1] as const;
+// Rotated by the hero typewriter — each fits "Generate a ___ in a single batch."
+const TYPE_WORDS = [
+  "week of video",
+  "month of Reels",
+  "week of TikToks",
+  "month of Shorts",
+  "week of ads",
+];
 
 // 5 columns, each a distinct trio → ~15 unique tiles, opposing drift.
 const COLUMNS: {
@@ -138,11 +147,11 @@ export function HeroScroll({ configured }: { configured: boolean }) {
   });
 
   // ── Wall — zooms out & straightens, then recedes and fades ───────────────
-  const wallScale = useTransform(p, [0, 0.55, 1], [1.3, 1.0, 1.16]);
+  const wallScale = useTransform(p, [0, 0.55, 1], [1.22, 1.0, 1.16]);
   const wallY = useTransform(p, [0, 1], ["2%", "-15%"]);
-  const wallRotateX = useTransform(p, [0, 0.55, 1], [15, 5, 2]);
-  const wallOpacity = useTransform(p, [0, 0.5, 0.82, 1], [0.9, 1, 0.6, 0.16]);
-  const auroraOpacity = useTransform(p, [0, 0.5, 1], [0.35, 0.55, 0.12]);
+  const wallRotateX = useTransform(p, [0, 0.55, 1], [12, 4, 2]);
+  const wallOpacity = useTransform(p, [0, 0.5, 0.82, 1], [1, 1, 0.6, 0.16]);
+  const auroraOpacity = useTransform(p, [0, 0.5, 1], [0.3, 0.5, 0.12]);
   const poolOpacity = useTransform(p, [0, 0.8, 1], [1, 1, 0.4]);
 
   // ── Center content — loads in on arrival, lifts & fades out on scroll ────
@@ -243,9 +252,9 @@ export function HeroScroll({ configured }: { configured: boolean }) {
           />
         </motion.div>
 
-        {/* scrims */}
-        <div className="pointer-events-none absolute inset-x-0 top-0 h-36 bg-gradient-to-b from-background/85 via-background/40 to-transparent" />
-        <div className="pointer-events-none absolute inset-x-0 bottom-0 h-2/5 bg-gradient-to-b from-transparent to-background" />
+        {/* scrims — kept light + localized so the wall stays visible */}
+        <div className="pointer-events-none absolute inset-x-0 top-0 h-32 bg-gradient-to-b from-background/80 via-background/30 to-transparent" />
+        <div className="pointer-events-none absolute inset-x-0 bottom-0 h-1/3 bg-gradient-to-b from-transparent to-background" />
         <motion.div
           aria-hidden
           style={{ opacity: poolOpacity }}
@@ -255,11 +264,11 @@ export function HeroScroll({ configured }: { configured: boolean }) {
             className="size-full"
             style={{
               background:
-                "radial-gradient(48% 46% at 50% 47%, color-mix(in oklch, var(--color-background) 74%, transparent) 0%, color-mix(in oklch, var(--color-background) 26%, transparent) 46%, transparent 74%)",
+                "radial-gradient(42% 40% at 50% 46%, color-mix(in oklch, var(--color-background) 66%, transparent) 0%, color-mix(in oklch, var(--color-background) 18%, transparent) 50%, transparent 76%)",
             }}
           />
         </motion.div>
-        <div className="pointer-events-none absolute inset-0 bg-[radial-gradient(125%_105%_at_50%_50%,transparent_62%,color-mix(in_oklch,var(--color-background)_90%,transparent)_100%)]" />
+        <div className="pointer-events-none absolute inset-0 bg-[radial-gradient(130%_110%_at_50%_50%,transparent_68%,color-mix(in_oklch,var(--color-background)_80%,transparent)_100%)]" />
         <div className="grain-overlay pointer-events-none absolute inset-0 opacity-[0.12]" />
 
         <StageDots progress={p} />
@@ -282,29 +291,38 @@ export function HeroScroll({ configured }: { configured: boolean }) {
             Auto-batch AI video generation, running 24/7
           </motion.div>
 
-          <h1 className="mt-7 text-balance text-[2.7rem] font-semibold leading-[1.02] tracking-tight sm:text-6xl lg:text-[4.6rem]">
-            {["Generate a", "week of video", "in a single batch."].map((line, i) => (
-              <motion.span
-                key={line}
-                initial={{ opacity: 0, y: 22 }}
-                animate={{ opacity: 1, y: 0 }}
-                transition={{ duration: 0.6, delay: 0.08 + i * 0.09, ease: EASE }}
-                className={cn(
-                  "block",
-                  i === 1 &&
-                    "bg-gradient-to-br from-primary via-[oklch(0.72_0.16_300)] to-[oklch(0.74_0.14_250)] bg-clip-text text-transparent",
-                )}
-              >
-                {line}
-              </motion.span>
-            ))}
+          <h1 className="mt-7 text-balance text-[2.7rem] font-semibold leading-[1.03] tracking-tight [text-shadow:0_2px_30px_rgba(0,0,0,0.55)] sm:text-6xl lg:text-[4.6rem]">
+            <motion.span
+              initial={{ opacity: 0, y: 22 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ duration: 0.6, delay: 0.08, ease: EASE }}
+              className="block"
+            >
+              Generate a
+            </motion.span>
+            <motion.span
+              initial={{ opacity: 0, y: 22 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ duration: 0.6, delay: 0.17, ease: EASE }}
+              className="block [text-shadow:none]"
+            >
+              <Typewriter words={TYPE_WORDS} />
+            </motion.span>
+            <motion.span
+              initial={{ opacity: 0, y: 22 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ duration: 0.6, delay: 0.26, ease: EASE }}
+              className="block"
+            >
+              in a single batch.
+            </motion.span>
           </h1>
 
           <motion.p
             initial={{ opacity: 0, y: 18 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ duration: 0.55, delay: 0.36, ease: EASE }}
-            className="mt-6 max-w-xl text-balance text-[15.5px] leading-relaxed text-foreground/75 sm:text-lg"
+            className="mt-6 max-w-xl text-balance text-[15.5px] leading-relaxed text-foreground/80 [text-shadow:0_1px_16px_rgba(0,0,0,0.6)] sm:text-lg"
           >
             Infinitents researches, scripts, renders, edits and publishes short-
             and long-form video — automatically, in batches. You don&apos;t manage

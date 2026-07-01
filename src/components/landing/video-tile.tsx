@@ -68,7 +68,7 @@ export function VideoTile({
     <div
       ref={wrapRef}
       className={cn(
-        "group relative aspect-[9/16] overflow-hidden border border-white/10 bg-black/40 shadow-[0_18px_50px_-20px_rgba(0,0,0,0.8)]",
+        "group relative aspect-[9/16] overflow-hidden border border-white/15 bg-black/40 shadow-[0_18px_50px_-20px_rgba(0,0,0,0.8)]",
         rounded,
         className,
       )}
@@ -92,6 +92,23 @@ export function VideoTile({
         >
           <source src={video.src} type="video/mp4" />
         </video>
+      )}
+
+      {/* Living light-sweep — keeps the tile cinematic before/without video.
+          Negative, id-derived delay so tiles don't all sweep in sync. */}
+      {!prefersReducedMotion && (
+        <div
+          aria-hidden
+          className="pointer-events-none absolute inset-0 mix-blend-screen"
+          style={{
+            background:
+              "linear-gradient(115deg, transparent 34%, color-mix(in oklch, white 16%, transparent) 50%, transparent 66%)",
+            backgroundSize: "220% 100%",
+            animation: "sheen 3.4s linear infinite",
+            animationDelay: `${-((video.id.charCodeAt(0) + video.id.charCodeAt(1)) % 34) / 10}s`,
+            opacity: ready ? 0.35 : 0.9,
+          }}
+        />
       )}
 
       {/* Legibility scrim + subtle top sheen */}
